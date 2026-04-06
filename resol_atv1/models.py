@@ -1,0 +1,53 @@
+from sqlalchemy import *
+from sqlalchemy.orm import declarative_base, relationship
+
+Base = declarative_base()
+
+class Livro(Base):
+    '''Classe representativa da entidade livros.'''
+    __tablename__ = "livros"
+    id = Column(Integer, primary_key=True)
+    titulo = Column(String, nullable=False)
+    autor = Column(String, nullable=False)
+    ano_publicacao = Column(Integer, nullable=False)
+    isbn = Column(String(13), unique=True)
+    created_at = Column(Date, server_default=func.current_date())
+    updated_at = Column(Date, 
+                        server_default=func.current_date(),
+                        onupdate=func.current_date())
+    emprestimos = relationship("Emprestimo", back_populates="livro")
+    
+    def __repr__(self):
+        return f'Título: {self.titulo} - Autor: {self.autor} - Ano Publicação: {self.ano_publicacao}'
+
+class Aluno(Base):
+    '''Classe representativa da entidade alunos.'''
+    __tablename__ = "alunos"
+    id = Column(Integer, primary_key=True)
+    nome = Column(String, nullable=False)
+    matricula = Column(String, nullable=False, unique=True)
+    curso = Column(String, nullable=False)
+    created_at = Column(Date, server_default=func.current_date())
+    updated_at = Column(Date, 
+                        server_default=func.current_date(),
+                        onupdate=func.current_date())
+    emprestimos = relationship("Emprestimo", back_populates="aluno")
+
+    def __repr__(self):
+        return f'Matrícula: {self.matricula} - Nome: {self.nome}'
+
+class Emprestimo(Base):
+    '''Classe representativa da entidade emprestimos.'''
+    __tablename__ = "emprestimos"
+    id = Column(Integer, primary_key=True)
+    aluno_id = Column(Integer, ForeignKey("alunos.id"))
+    livros_id = Column(Integer, ForeignKey("livros.id"))
+    data_retirada = Column(Date, nullable=False)
+    data_devolucao = Column(Date, nullable=True)
+    created_at = Column(Date, server_default=func.current_date())
+    updated_at = Column(Date, 
+                        server_default=func.current_date(),
+                        onupdate=func.current_date())
+    
+    aluno = relationship("Aluno", back_populates="emprestimos")
+    livro = relationship("Livro", back_populates="emprestimos")
