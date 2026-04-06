@@ -21,12 +21,14 @@ class AlunoService():
     
     @classmethod
     def delete(cls, id:int) -> Any:
+        cls.session.query(Aluno).where(Aluno.id == id).one()
         cls.session.execute(delete(Aluno).where(Aluno.id == id))
         cls.session.commit()
         return 'Usuário deletado com sucesso!'
     
     @classmethod
     def soft_delete(cls, id: int) -> Any:
+        cls.session.query(Aluno).where(Aluno.id == id).one()
         cls.session.execute(update(Aluno).where(Aluno.id == id).values(ativo = False))
         cls.session.commit()
         return 'Usuário deletado com sucesso!'
