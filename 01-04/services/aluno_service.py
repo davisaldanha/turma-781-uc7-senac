@@ -15,6 +15,7 @@ class AlunoService():
     @classmethod
     def update(cls, aluno: dict, id: int) -> Any:
         #up_aluno = Aluno(**aluno)
+        cls.session.query(Aluno).where(Aluno.id == id).one()
         cls.session.execute(update(Aluno).where(Aluno.id == id).values(aluno))
         cls.session.commit()
         return 'Usuário atualizado com sucesso!'
@@ -47,3 +48,20 @@ class AlunoService():
     def find_by_id(cls, id: int) -> Aluno:
         result = cls.session.query(Aluno).where(Aluno.id == id).one()
         return result
+    
+    @classmethod
+    def find_by_course(cls, curso: str) -> list:
+        alunos = cls.session.query(Aluno).where(Aluno.curso == curso).all()
+
+        result = []
+        
+        for a in alunos:
+            result.append(a._to_dict())
+
+        return result
+    
+    @classmethod
+    def find_by_register(cls, matricula: str) -> Aluno:
+        result = cls.session.query(Aluno).where(Aluno.matricula == matricula).one()
+        return result._to_dict()
+    
