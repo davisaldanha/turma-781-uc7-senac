@@ -29,6 +29,26 @@ def create_aluno():
 @app.route('/alunos')
 def select_alunos():
     try:
+        matricula = request.args.get('matricula')
+        curso = request.args.get('curso')
+
+        if matricula: 
+            result = AlunoService.find_by_register(matricula)
+
+            return jsonify({
+                        "message": "Aluno pesquisado com sucesso!",
+                        "data": f"{result}",
+                        "timestamp": datetime.today().strftime("%d-%m-%Y - %H:%M:%S")
+                    }), 200
+
+        if curso: 
+            result = AlunoService.find_by_course(curso)
+            return jsonify({
+                        "message": f"Alunos do curso {curso}",
+                        "data": f"{result}",
+                        "timestamp": datetime.today().strftime("%d-%m-%Y - %H:%M:%S")
+                    }), 200
+
         result = AlunoService.find_all()
         return jsonify({
                     "message": "Alunos cadastrados no sistema!",
@@ -67,7 +87,7 @@ def select_by_id_aluno(id: int):
                 }), 500
 
 @app.route('/alunos/<int:id>', methods=['DELETE'])
-def delete(id: int):
+def delete_aluno(id: int):
     try:
         AlunoService.delete(id)
 
@@ -89,3 +109,35 @@ def delete(id: int):
                     "data": None,
                     "timestamp": datetime.today().strftime("%d-%m-%Y - %H:%M:%S")
                 }), 500
+    
+@app.route('/alunos/<int:id>', methods=['PUT'])
+def update_aluno(id: int):
+    try:
+        up_aluno = request.json
+
+        result = AlunoService.update(up_aluno, id)
+
+        return jsonify({
+                    "message": result,
+                    "data": None,
+                    "timestamp": datetime.today().strftime("%d-%m-%Y - %H:%M:%S")
+                }), 200
+    except NoResultFound:
+        return jsonify({
+                    "message": f"Aluno não foi encontrado!",
+                    "data": None,
+                    "timestamp": datetime.today().strftime("%d-%m-%Y - %H:%M:%S")
+                }), 404
+    except (SQLAlchemyError, Exception) as e:
+        return jsonify({
+                    "message": f"Erro interno no servidor: {e}",
+                    "data": None,
+                    "timestamp": datetime.today().strftime("%d-%m-%Y - %H:%M:%S")
+                }), 500
+
+    
+'''
+# --- Backlog --- #
+Criar endpoint/serviço para pesquisar aluno por matricula
+Criar endpoint/serviço para pesquisar alunos por curso
+'''
