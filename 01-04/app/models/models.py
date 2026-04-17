@@ -22,6 +22,16 @@ class Livro(Base):
     
     def __repr__(self):
         return f'Título: {self.titulo} - Autor: {self.autor} - Ano Publicação: {self.ano_publicacao}'
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "titulo": self.titulo,
+            "autor": self.autor,
+            "ano_publicacao": self.ano_publicacao,
+            "isbn": self.isbn,
+            'ativo': self.ativo
+        }
 
 class Aluno(Base):
     '''Classe representativa da entidade alunos.'''
@@ -54,6 +64,7 @@ class Emprestimo(Base):
     id = Column(Integer, primary_key=True)
     aluno_id = Column(Integer, ForeignKey("alunos.id"))
     livros_id = Column(Integer, ForeignKey("livros.id"))
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
     data_retirada = Column(Date, nullable=False)
     data_devolucao = Column(Date, nullable=True)
     created_at = Column(Date, server_default=func.current_date())
@@ -63,12 +74,35 @@ class Emprestimo(Base):
     
     aluno = relationship("Aluno", back_populates="emprestimos")
     livro = relationship("Livro", back_populates="emprestimos")
+    usuario = relationship("Usuario", back_populates="emprestimos")
 
     def to_dict(self):
         return {
             'id': self.id,
             'aluno_id': self.aluno_id,
             'livro_id': self.livros_id,
+            'usuario_id': self.usuario_id,
             'data_retirada': self.data_retirada,
             'data_devolucao': self.data_devolucao
+        }
+    
+class Usuario(Base):
+    '''Classe representativa da entidade usuarios.'''
+    __tablename__ = "usuarios"
+    id = Column(Integer, primary_key=True)
+    nome = Column(String, nullable=False)
+    username = Column(String, nullable=False, unique=True)
+    password = Column(String, nullable=False)
+    created_at = Column(Date, server_default=func.current_date())
+    updated_at = Column(Date, 
+                        server_default=func.current_date(),
+                        onupdate=func.current_date())
+    
+    emprestimos = relationship("Emprestimo", back_populates="usuario")
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nome': self.nome,
+            'username': self.username
         }
