@@ -97,7 +97,7 @@ class LivroService:
             Objeto `Livro`.
         '''
         livro = cls.session.query(Livro).where(Livro.id == id).one()
-        return livro
+        return livro.to_dict()
     
     @classmethod
     def update(cls, id: int, livro: dict) -> str:
@@ -110,7 +110,7 @@ class LivroService:
             livro (dict): dicionário com os dados do livro
 
         Return:
-            Objeto `Livro`.
+            Mensagem de confirmação da modificação do objeto.
         '''
         cls.session.query(Livro).where(Livro.id == id).one()
         cls.session.execute(update(Livro).where(Livro.id == id).values(livro))
@@ -119,7 +119,7 @@ class LivroService:
         return 'Livro atualizado com sucesso!'
     
     @classmethod
-    def find_by_fields(cls, fields: dict) -> list:
+    def find_by_fields(cls, fields: dict) -> Any:
         '''
             Retorna os livros filtrados pelos atributos.
 
@@ -129,41 +129,27 @@ class LivroService:
             Return:
                 Livros cadastrados
         '''
-        result = []
+        sql = 'SELECT * FROM livros WHERE '
+
+        _length = len(fields.items())
+        _cont = 0
+
         for k, v in fields.items():
-            match k:
-                case 'titulo':
-                    livros = cls.session.query(Livro).where(Livro.titulo == v).all()
-                    
-                    for l in livros:
-                        result.append(l.to_dict())
+            _cont += 1
 
-                    return result
+            if 'ano_publicacao' in k and _cont == _length:
+                sql += f"{k} = {v}"
+                continue
+            elif 'ano_publicacao' in k:
+                sql += f"{k} = {v} AND "
+                continue
 
-                case 'autor':
-                    livros = cls.session.query(Livro).where(Livro.autor == v).all()
-                    
-                    for l in livros:
-                        result.append(l.to_dict())
-                    
-                    return result
-                
-                case 'ano_publicação':
-                    livros = cls.session.query(Livro).where(Livro.ano_publicacao == v).all()
-                    
-                    for l in livros:
-                        result.append(l.to_dict())
-                    
-                    return result
-                
-                case 'isbn':
-                    livros = cls.session.query(Livro).where(Livro.isbn == v).all()
-                    
-                    for l in livros:
-                        result.append(l.to_dict())
-                    
-                    return result
-                    
-        
-    
-    
+            if _cont == _length:
+                sql += f"{k} LIKE '%{v}%'"
+                break
+
+            sql += f"{k} LIKE '%{v}%' AND "
+
+        con = cls.session.connection()            
+            
+        return [i for i in con.exec_driver_sql(sql)]
