@@ -2,10 +2,12 @@ from flask import *
 from app.services.emprestimo_service import *
 from sqlalchemy.exc import *
 from datetime import datetime
+from flask_jwt_extended import *
 
 emprestimo_bp = Blueprint('emprestimo', __name__, url_prefix='/emprestimos')
 
 @emprestimo_bp.route('/')
+@jwt_required()
 def select_emprestimos():
     try:
         result = EmprestimoService.find_all()
@@ -14,7 +16,7 @@ def select_emprestimos():
                     "message": "Empréstimos cadastrados!",
                     "data": result,
                     "timestamp": datetime.today().strftime("%d-%m-%Y - %H:%M:%S")
-                }), 201
+                }), 200
     except Exception as e:
          return jsonify({
                     "message": f"{e}",
@@ -23,6 +25,7 @@ def select_emprestimos():
                 }), 500
     
 @emprestimo_bp.route('/<int:id>')
+@jwt_required()
 def select_by_id_emprestimos(id: int):
     try:
 
@@ -47,11 +50,13 @@ def select_by_id_emprestimos(id: int):
                 }), 500
 
 @emprestimo_bp.route('/', methods=['POST'])
+@jwt_required()
 def create_emprestimo():
     try:
         emprestimo = request.json
+        usuario = get_jwt_identity()
 
-        result = EmprestimoService.create(emprestimo['aluno_id'], emprestimo['livro_id'])
+        result = EmprestimoService.create(emprestimo['aluno_id'], emprestimo['livro_id'], usuario)
 
         return jsonify({
                     "message": f"{result}",
@@ -66,6 +71,7 @@ def create_emprestimo():
                 }), 500
 
 @emprestimo_bp.route('/finalizar', methods=['PUT'])
+@jwt_required()
 def finish_emprestimo():
     try:
         result = EmprestimoService.finish()        
