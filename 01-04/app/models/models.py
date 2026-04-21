@@ -82,8 +82,9 @@ class Emprestimo(Base):
             'aluno_id': self.aluno_id,
             'livro_id': self.livros_id,
             'usuario_id': self.usuario_id,
-            'data_retirada': self.data_retirada,
-            'data_devolucao': self.data_devolucao
+            'data_retirada': f'{datetime.strftime(self.data_retirada, "%Y-%m-%d")}',
+            'data_devolucao': f'{datetime.strftime(self.data_devolucao, "%Y-%m-%d")}'
+            if self.data_devolucao else None
         }
     
 class Usuario(Base):
