@@ -7,11 +7,15 @@ class EmprestimoService:
     session = SessionaLocal()
 
     @classmethod
-    def create(cls, aluno_id, livro_id):
+    def create(cls, aluno_id, livro_id, usuario):
         cls.session.query(Aluno).where(Aluno.id == aluno_id).one()
         cls.session.query(Livro).where(Livro.id == livro_id).one()
+        usuario_id = cls.session.query(Usuario).where(Usuario.username == usuario).one().id
 
-        emprestimo = Emprestimo(aluno_id = aluno_id, livros_id = livro_id, data_retirada = date.today())
+        emprestimo = Emprestimo(aluno_id = aluno_id, 
+                                livros_id = livro_id, 
+                                data_retirada = date.today(), 
+                                usuario_id = usuario_id)
 
         cls.session.add(emprestimo)
         cls.session.commit()
