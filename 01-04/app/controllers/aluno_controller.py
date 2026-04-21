@@ -1,4 +1,5 @@
 from flask import *
+from flask_jwt_extended import jwt_required
 from app.services.aluno_service import *
 from datetime import datetime
 from sqlalchemy.exc import *
@@ -6,6 +7,7 @@ from sqlalchemy.exc import *
 aluno_bp = Blueprint('aluno', __name__, url_prefix='/alunos')
 
 @aluno_bp.route('/', methods=['POST'])
+@jwt_required()
 def create_aluno():
     try:
         aluno = request.json
@@ -23,6 +25,7 @@ def create_aluno():
                 }), 500
     
 @aluno_bp.route('/')
+@jwt_required()
 def select_alunos():
     try:
         matricula = request.args.get('matricula')
@@ -59,6 +62,7 @@ def select_alunos():
                 }), 500
 
 @aluno_bp.route('/<int:id>')
+@jwt_required()
 def select_by_id_aluno(id: int):
     try:
 
@@ -83,6 +87,7 @@ def select_by_id_aluno(id: int):
                 }), 500
 
 @aluno_bp.route('/<int:id>', methods=['DELETE'])
+@jwt_required()
 def delete_aluno(id: int):
     try:
         AlunoService.delete(id)
@@ -107,6 +112,7 @@ def delete_aluno(id: int):
                 }), 500
     
 @aluno_bp.route('/<int:id>', methods=['PUT'])
+@jwt_required()
 def update_aluno(id: int):
     try:
         up_aluno = request.json
